@@ -198,11 +198,7 @@ impl MetadataSource {
         }
     }
 
-    pub fn from_mpris(metadata: Metadata) -> Self {
-        Self::from_mpris_with_override(metadata, None)
-    }
-
-    pub fn from_mpris_with_override(metadata: Metadata, override_url: Option<String>) -> Self {
+    pub fn from_mpris(metadata: Metadata, override_url: Option<String>) -> Self {
         let override_tagged_file = override_url
             .as_ref()
             .and_then(|url| Self::lofty_tag_from_url(url).ok());

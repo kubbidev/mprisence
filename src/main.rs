@@ -33,6 +33,7 @@ mod error;
 mod metadata;
 mod player;
 mod presence;
+mod spotify_local;
 mod template;
 mod utils;
 
@@ -71,6 +72,7 @@ pub struct Mprisence {
     cover_manager: Arc<CoverManager>,
     config_rx: config::ConfigChangeReceiver,
     config: Arc<ConfigManager>,
+    local_library: Arc<spotify_local::Library>,
 }
 
 #[derive(Clone, Debug)]
@@ -91,6 +93,9 @@ impl Mprisence {
         trace!("Creating cover manager");
         let cover_manager = Arc::new(CoverManager::new(&config)?);
 
+        trace!("Creating local library");
+        let local_library = Arc::new(spotify_local::Library::new(&config)?);
+        
         debug!("Service initialization complete");
         Ok(Self {
             media_players: HashMap::new(),
@@ -99,6 +104,7 @@ impl Mprisence {
             cover_manager,
             config_rx: config.subscribe(),
             config,
+            local_library
         })
     }
 
@@ -108,6 +114,7 @@ impl Mprisence {
 
         self.template_manager = Arc::new(template::TemplateManager::new(&self.config)?);
         self.cover_manager = Arc::new(CoverManager::new(&self.config)?);
+        self.local_library = Arc::new(spotify_local::Library::new(&self.config)?);
         debug!("Template and cover managers updated successfully");
 
         for (_norm_id, presence) in self.media_players.iter_mut() {
@@ -133,6 +140,7 @@ impl Mprisence {
                 presence.update_managers(
                     self.template_manager.clone(),
                     self.cover_manager.clone(),
+                    self.local_library.clone(),
                     self.config.clone(),
                 );
             }
@@ -293,6 +301,7 @@ impl Mprisence {
                     winner_player,
                     self.template_manager.clone(),
                     self.cover_manager.clone(),
+                    self.local_library.clone(),
                     self.config.clone(),
                 );
                 if let Err(e) = presence.initialize_discord_client() {

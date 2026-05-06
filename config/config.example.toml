@@ -25,6 +25,14 @@ interval = 2000
 # allowed_players = ["vlc_media_player", "*mpd*", "re:.*youtube_music.*"]
 allowed_players = []
 
+# Directories to scan for local music files, used to resolve Spotify local tracks
+# (spotify:local:... URLs) to actual files on disk for metadata and cover art.
+# Subdirectories are scanned recursively. Leave empty to disable (default).
+# Supported formats: mp3, flac, ogg, opus, m4a, wav, aiff, wma
+# Example:
+# local_library_dirs = ["/home/user/Music", "/mnt/nas/music"]
+local_library_dirs = []
+
 # ------------------
 # Display Template
 # ------------------

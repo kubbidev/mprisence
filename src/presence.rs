@@ -39,6 +39,7 @@ use crate::{
         events::{self, EventOutcome, PlayerEvent, PlayerEventKind},
         PlaybackState, PlayerIdentifier,
     },
+    spotify_local::Library,
     template::TemplateManager,
     utils,
 };
@@ -120,6 +121,7 @@ pub struct Presence {
     player_id: PlayerIdentifier,
     template_manager: Arc<TemplateManager>,
     cover_manager: Arc<CoverManager>,
+    local_library: Arc<Library>,
     last_player_state: Option<PlaybackState>,
     last_cmus_track_id: Mutex<Option<Box<str>>>,
     last_cmus_path: Mutex<Option<PathBuf>>,
@@ -149,6 +151,7 @@ impl Presence {
         player: Player,
         template_manager: Arc<TemplateManager>,
         cover_manager: Arc<CoverManager>,
+        local_library: Arc<Library>,
         config: Arc<ConfigManager>,
     ) -> Self {
         let player_bus_name = canonical_player_bus_name(player.bus_name());
@@ -162,6 +165,7 @@ impl Presence {
             player_id,
             template_manager,
             cover_manager,
+            local_library,
             last_player_state: None,
             last_cmus_track_id: Mutex::new(None),
             last_cmus_path: Mutex::new(None),
@@ -609,12 +613,13 @@ impl Presence {
             None
         };
 
-        let metadata_source = match cmus_override_url {
-            Some(url) => {
-                metadata::MetadataSource::from_mpris_with_override(metadata.clone(), Some(url))
-            }
-            None => metadata::MetadataSource::from_mpris(metadata.clone()),
-        };
+        let effective_url = cmus_override_url.or_else(|| {
+            metadata
+                .url()
+                .and_then(|url| crate::spotify_local::resolve_to_file_url(url, &self.local_library))
+        });
+        let metadata_source =
+            metadata::MetadataSource::from_mpris(metadata.clone(), effective_url);
 
         debug!("--- Raw Metadata Start ---");
         if let Some(mpris_meta) = metadata_source.mpris_metadata() {
@@ -863,6 +868,7 @@ impl Presence {
         &mut self,
         template_manager: Arc<TemplateManager>,
         cover_manager: Arc<CoverManager>,
+        local_library: Arc<Library>,
         config: Arc<ConfigManager>,
     ) {
         trace!(
@@ -871,6 +877,7 @@ impl Presence {
         );
         self.template_manager = template_manager;
         self.cover_manager = cover_manager;
+        self.local_library = local_library;
         self.config = config;
         trace!("Presence managers updated successfully");
 

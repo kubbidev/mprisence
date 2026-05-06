@@ -125,6 +125,9 @@ pub struct Config {
     #[serde(default = "default_allowed_players")]
     pub allowed_players: Vec<String>,
 
+    #[serde(default = "default_local_library_dirs")]
+    pub local_library_dirs: Vec<String>,
+
     pub template: TemplateConfig,
 
     pub time: TimeConfig,
@@ -163,6 +166,10 @@ fn default_allowed_players() -> Vec<String> {
     Vec::new()
 }
 
+fn default_local_library_dirs() -> Vec<String> {
+    Vec::new()
+}
+
 impl Default for Config {
     fn default() -> Self {
         Config {
@@ -170,6 +177,7 @@ impl Default for Config {
             event_driven: default_event_driven(),
             discovery_interval: default_discovery_interval(),
             allowed_players: default_allowed_players(),
+            local_library_dirs: default_local_library_dirs(),
             template: TemplateConfig::default(),
             time: TimeConfig::default(),
             cover: CoverConfig::default(),

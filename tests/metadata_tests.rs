@@ -3,6 +3,10 @@ use mprisence::metadata::MetadataSource;
 use serde_json::Value;
 use std::collections::HashMap;
 
+fn create_extended_mpris_metadata_source() -> MetadataSource {
+    MetadataSource::from_mpris(create_extended_mpris_metadata(), None)
+}
+
 fn create_extended_mpris_metadata() -> Metadata {
     let mut data = HashMap::new();
 
@@ -58,7 +62,7 @@ fn create_extended_mpris_metadata() -> Metadata {
 
 #[test]
 fn test_string_fields() {
-    let metadata = MetadataSource::from_mpris(create_extended_mpris_metadata());
+    let metadata = create_extended_mpris_metadata_source();
     let media = metadata.to_media_metadata();
 
     // Test string fields that exist in both MPRIS and Lofty
@@ -72,7 +76,7 @@ fn test_string_fields() {
 
 #[test]
 fn test_array_fields() {
-    let metadata = MetadataSource::from_mpris(create_extended_mpris_metadata());
+    let metadata = create_extended_mpris_metadata_source();
     let media = metadata.to_media_metadata();
 
     // Test array fields
@@ -88,7 +92,7 @@ fn test_array_fields() {
 
 #[test]
 fn test_numeric_fields() {
-    let metadata = MetadataSource::from_mpris(create_extended_mpris_metadata());
+    let metadata = create_extended_mpris_metadata_source();
     let media = metadata.to_media_metadata();
 
     // Test numeric fields that exist in both MPRIS and Lofty
@@ -105,7 +109,7 @@ fn test_numeric_fields() {
 
 #[test]
 fn test_mpris_only_fields() {
-    let metadata = MetadataSource::from_mpris(create_extended_mpris_metadata());
+    let metadata = create_extended_mpris_metadata_source();
     let media = metadata.to_media_metadata();
 
     // Test MPRIS-only string fields
@@ -123,7 +127,7 @@ fn test_mpris_only_fields() {
 #[test]
 fn test_missing_fields() {
     let metadata = Metadata::new("/test/1"); // Create empty metadata
-    let metadata = MetadataSource::from_mpris(metadata);
+    let metadata = MetadataSource::from_mpris(metadata, None);
     let media = metadata.to_media_metadata();
 
     // Test that missing fields return None
@@ -143,7 +147,7 @@ fn test_invalid_numeric_fields() {
     data.insert("xesam:movementNumber".to_string(), "not_a_number".into());
 
     let metadata = Metadata::from(data);
-    let metadata = MetadataSource::from_mpris(metadata);
+    let metadata = MetadataSource::from_mpris(metadata, None);
     let media = metadata.to_media_metadata();
 
     // Test that invalid numeric fields return None
@@ -154,8 +158,7 @@ fn test_invalid_numeric_fields() {
 
 #[test]
 fn test_metadata_extraction() {
-    let mpris_metadata = create_extended_mpris_metadata();
-    let metadata_source = MetadataSource::from_mpris(mpris_metadata);
+    let metadata_source = create_extended_mpris_metadata_source();
 
     // Test basic metadata extraction
     assert_eq!(metadata_source.title(), Some("Test Title".to_string()));
@@ -177,8 +180,7 @@ fn test_metadata_extraction() {
 
 #[test]
 fn test_to_media_metadata_conversion() {
-    let mpris_metadata = create_extended_mpris_metadata();
-    let metadata_source = MetadataSource::from_mpris(mpris_metadata);
+    let metadata_source = create_extended_mpris_metadata_source();
     let media_metadata = metadata_source.to_media_metadata();
 
     // Check that the MediaMetadata has all expected fields
@@ -257,8 +259,7 @@ fn test_metadata_from_json() {
 
 #[test]
 fn test_extended_metadata_fields() {
-    let mpris_metadata = create_extended_mpris_metadata();
-    let metadata_source = MetadataSource::from_mpris(mpris_metadata);
+    let metadata_source = create_extended_mpris_metadata_source();
     let media_metadata = metadata_source.to_media_metadata();
 
     // Test composer and performers

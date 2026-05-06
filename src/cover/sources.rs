@@ -35,7 +35,8 @@ impl ArtSource {
                 Err(_) => return None,
             }
         } else {
-            url.parse().ok()
+            debug!("Unrecognized URL: '{}'", url);
+            return None
         };
 
         path.map(|p| {
