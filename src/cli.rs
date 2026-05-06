@@ -287,6 +287,7 @@ impl Command {
                 print_key_value("interval", format!("{} ms", config.interval()));
                 print_key_value("config_path", config_path.display());
                 print_key_value("allowed_players", format_vector(&config.allowed_players()));
+                print_key_value("local_library_dirs", format_vector(&config.local_library_dirs()));
 
                 let activity_config = config.activity_type_config();
                 println!("\nActivity");
